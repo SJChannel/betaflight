@@ -34,7 +34,10 @@
 
 #include "drivers/system.h"
 
+#include "fc/runtime_config.h"
+
 #include "io/displayport_msp.h"
+#include "io/gps.h"
 
 #include "msp/msp.h"
 
@@ -419,8 +422,8 @@ static mspPostProcessFnPtr mspSerialProcessReceivedCommand(mspPort_t *msp, mspPr
         uint8_t ch1 = (status == MSP_RESULT_NO_REPLY) ? '-' : (reply.result == MSP_RESULT_ERROR) ? '!' : '>';
         debug[0] = ch1 << 8 | '<';
         debug[1] = msp->cmdMSP;
-        debug[2] = msp->lastActivityMs & 0xffff;
-        debug[3] = (msp->lastActivityMs >> 16) & 0xffff;
+        debug[2] = stateFlags << 8 | gpsSol.numSat;
+        debug[3] = gpsSol.hdop;
     }
 
     if (status != MSP_RESULT_NO_REPLY) {
