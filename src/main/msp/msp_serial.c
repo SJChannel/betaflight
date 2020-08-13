@@ -415,6 +415,14 @@ static mspPostProcessFnPtr mspSerialProcessReceivedCommand(mspPort_t *msp, mspPr
     mspPostProcessFnPtr mspPostProcessFn = NULL;
     const mspResult_e status = mspProcessCommandFn(msp->descriptor, &command, &reply, &mspPostProcessFn);
 
+    if (debugMode == DEBUG_DJI_OSD && msp->port->identifier == SERIAL_PORT_USART1) {
+        uint8_t ch1 = (status == MSP_RESULT_NO_REPLY) ? '-' : (reply.result == MSP_RESULT_ERROR) ? '!' : '>';
+        debug[0] = ch1 << 8 | '<';
+        debug[1] = msp->cmdMSP;
+        debug[2] = msp->lastActivityMs & 0xffff;
+        debug[3] = (msp->lastActivityMs >> 16) & 0xffff;
+    }
+
     if (status != MSP_RESULT_NO_REPLY) {
         sbufSwitchToReader(&reply.buf, outBufHead); // change streambuf direction
         mspSerialEncode(msp, &reply, msp->mspVersion);
